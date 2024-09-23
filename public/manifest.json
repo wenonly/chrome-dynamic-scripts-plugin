@@ -1,36 +1,39 @@
 {
-    "manifest_version": 2,
-    "name": "__MSG_scriptcat__333",
-    "version": "0.16.5",
-    "author": "CodFrm",
-    "description": "__MSG_scriptcat_description__",
-    "options_ui": {
-      "page": "src/options/index.html",
-      "open_in_tab": true
-    },
-    "browser_action": {
-      "default_popup": "src/popup/index.html"
-    },
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"],
-        "run_at": "document_start",
-        "all_frames": true
-      }
-    ],
-    "permissions": [
-      "tabs",
-      "cookies",
-      "storage",
-      "downloads",
-      "webRequest",
-      "background",
-      "<all_urls>",
-      "contextMenus",
-      "notifications",
-      "clipboardWrite",
-      "webRequestBlocking"
-    ]
-  }
-  
+  "manifest_version": 2,
+  "name": "dynamic-script",
+  "version": "0.16.5",
+  "author": "wenonly",
+  "description": "run custom javascript in browser",
+  "options_ui": {
+    "page": "src/options/index.html",
+    "open_in_tab": true
+  },
+  "browser_action": {
+    "default_popup": "src/popup/index.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.iife.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "tabs",
+    "cookies",
+    "storage",
+    "downloads",
+    "webRequest",
+    "background",
+    "<all_urls>",
+    "contextMenus",
+    "notifications",
+    "clipboardWrite",
+    "webRequestBlocking"
+  ]
+}

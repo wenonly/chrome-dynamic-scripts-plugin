@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
-import { Button, List, Switch, message } from "antd";
 import {
-  CheckCircleFilled,
-  CloseCircleFilled,
+  EditOutlined,
   PlayCircleOutlined,
+  RocketOutlined,
+  ThunderboltOutlined,
 } from "@ant-design/icons";
-import "./App.css";
+import { Button, Divider, Empty, List, Switch, Tooltip } from "antd";
+import { useEffect, useState } from "react";
 import { Script } from "../options/App";
+import "./App.css";
 
 function App() {
   const [scripts, setScripts] = useState<Script[]>([]);
@@ -29,6 +30,21 @@ function App() {
     });
   }, []);
 
+  const alertMessage = (
+    type: "success" | "error" | "info" | "warning",
+    content: string
+  ) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0].id) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "alertMessage",
+          type,
+          content,
+        });
+      }
+    });
+  };
+
   const executeScript = (script: Script) => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0].id) {
@@ -37,9 +53,10 @@ function App() {
           { action: "executeScript", code: script.code },
           (response) => {
             if (response && response.success) {
-              message.success(`脚本 "${script.name}" 已执行`);
+              alertMessage("success", `脚本 "${script.name}" 已执行`);
             } else {
-              message.error(
+              alertMessage(
+                "error",
                 `执行脚本 "${script.name}" 时出错: ${
                   response?.error || "未知错误"
                 }`
@@ -51,12 +68,13 @@ function App() {
     });
   };
 
-  return (
-    <div className="p-4 bg-white" style={{ width: "300px" }}>
-      <h2 className="text-lg font-bold mb-4">脚本列表</h2>
+  const renderList = (list: Script[], title: string) =>
+    !!list.length && (
       <List
+        header={<div className="text-left">{title}</div>}
+        bordered
         itemLayout="horizontal"
-        dataSource={scripts}
+        dataSource={list}
         renderItem={(script) => (
           <List.Item
             actions={[
@@ -64,26 +82,65 @@ function App() {
                 checked={script.autoRun}
                 onChange={() => toggleScript(script.id)}
               />,
-              <Button
-                icon={<PlayCircleOutlined />}
-                onClick={() => executeScript(script)}
-              />,
+              <Tooltip title="执行脚本">
+                <Button
+                  icon={<PlayCircleOutlined />}
+                  onClick={() => executeScript(script)}
+                />
+              </Tooltip>,
             ]}
           >
             <List.Item.Meta
               avatar={
-                script.autoRun ? (
-                  <CheckCircleFilled style={{ color: "#52c41a" }} />
-                ) : (
-                  <CloseCircleFilled style={{ color: "#ff4d4f" }} />
-                )
+                <div className="h-[50px] flex items-center justify-center">
+                  {script.autoRun ? (
+                    <ThunderboltOutlined
+                      style={{ color: "#1890ff", fontSize: "24px" }}
+                    />
+                  ) : (
+                    <RocketOutlined
+                      style={{ color: "#52c41a", fontSize: "24px" }}
+                    />
+                  )}
+                </div>
               }
-              title={script.name}
+              title={
+                <Tooltip title={script.name}>
+                  <div className="truncate max-w-[150px]">{script.name}</div>
+                </Tooltip>
+              }
               description={script.autoRun ? "自动执行" : "手动执行"}
             />
           </List.Item>
         )}
       />
+    );
+
+  return (
+    <div className="p-4 bg-white" style={{ width: "360px" }}>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold text-left">脚本列表</h2>
+        <EditOutlined
+          className="text-lg cursor-pointer"
+          onClick={() => chrome.runtime.openOptionsPage()}
+        />
+      </div>
+      <Divider />
+      {scripts.length > 0 ? (
+        <>
+          {renderList(
+            scripts.filter((item) => item.autoRun),
+            "自动执行"
+          )}
+          <br />
+          {renderList(
+            scripts.filter((item) => !item.autoRun),
+            "手动执行"
+          )}
+        </>
+      ) : (
+        <Empty description="暂无脚本" style={{ marginBottom: "30px" }} />
+      )}
     </div>
   );
 }
