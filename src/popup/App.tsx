@@ -109,7 +109,7 @@ function App() {
                   <div className="truncate max-w-[150px]">{script.name}</div>
                 </Tooltip>
               }
-              // description={script.autoRun ? "自动执行" : "手动执行"}
+              description={script.autoRun ? script.match : "手动执行"}
             />
           </List.Item>
         )}
@@ -120,7 +120,9 @@ function App() {
     <div className="p-4 bg-white" style={{ width: "360px" }}>
       <div className="flex justify-between items-center mb-4 bg-blue-50 p-3 rounded-lg shadow-sm">
         <h2 className="text-2xl font-extrabold text-blue-700 relative">
-          <span className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text hover:from-purple-500 hover:to-blue-500 transition-all duration-300">脚本狗子</span>
+          <span className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text hover:from-purple-500 hover:to-blue-500 transition-all duration-300">
+            脚本狗子
+          </span>
           <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 transform scale-x-0 transition-transform duration-300 origin-left group-hover:scale-x-100"></span>
         </h2>
         <EditOutlined

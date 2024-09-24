@@ -1,6 +1,15 @@
 import { javascript } from "@codemirror/lang-javascript";
 import CodeMirror from "@uiw/react-codemirror";
-import { Button, Checkbox, Form, Input, Modal, Popconfirm, Table } from "antd";
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Modal,
+  Popconfirm,
+  Table,
+  message,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
 import "./App.css";
@@ -69,6 +78,45 @@ function App() {
     saveScripts(updatedScripts);
   };
 
+  const exportScripts = () => {
+    const scriptsWithEncodedCode = scripts.map((script) => ({
+      ...script,
+      code: btoa(script.code),
+    }));
+    const dataStr = JSON.stringify(scriptsWithEncodedCode);
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+    const exportFileDefaultName = "scripts_export.json";
+
+    const linkElement = document.createElement("a");
+    linkElement.setAttribute("href", dataUri);
+    linkElement.setAttribute("download", exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const importScripts = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedScripts: Script[] = JSON.parse(
+            e.target?.result as string
+          );
+          const scriptsWithDecodedCode = importedScripts.map((script) => ({
+            ...script,
+            code: atob(script.code),
+          }));
+          saveScripts(scriptsWithDecodedCode);
+          message.success("脚本导入成功");
+        } catch (error) {
+          message.error("导入失败，请检查文件格式");
+        }
+      };
+      reader.readAsText(file);
+    }
+  };
+
   const columns: ColumnsType<Script> = [
     {
       title: "脚本名称",
@@ -85,7 +133,7 @@ function App() {
       title: "URL匹配",
       dataIndex: "match",
       key: "match",
-      render: (match: string) => match || "所有页面",
+      render: (match: string) => match || "未配置",
     },
     {
       title: "操作",
@@ -108,10 +156,27 @@ function App() {
 
   return (
     <div className="App">
-      <h1>脚本配置</h1>
-      <Button onClick={() => showModal(null)} style={{ marginBottom: 16 }}>
-        添加脚本
-      </Button>
+      <h1>脚本狗子配置</h1>
+      <div style={{ marginBottom: 16 }}>
+        <Button onClick={() => showModal(null)} style={{ marginRight: 8 }}>
+          添加脚本
+        </Button>
+        <Button onClick={exportScripts} style={{ marginRight: 8 }}>
+          导出脚本
+        </Button>
+        <input
+          type="file"
+          accept=".json"
+          onChange={importScripts}
+          style={{ display: "none" }}
+          id="import-scripts"
+        />
+        <Button
+          onClick={() => document.getElementById("import-scripts")?.click()}
+        >
+          导入脚本
+        </Button>
+      </div>
       <Table columns={columns} dataSource={scripts} rowKey="id" />
       <Modal
         title={editingScript ? "编辑脚本" : "添加脚本"}
@@ -137,7 +202,7 @@ function App() {
           </Form.Item>
           <Form.Item
             name="match"
-            label="URL匹配（留空表示所有页面）"
+            label="URL匹配（留空表示所有页面，用于自动执行时匹配网页）"
             dependencies={["autoRun"]}
             rules={[
               ({ getFieldValue }) => ({
