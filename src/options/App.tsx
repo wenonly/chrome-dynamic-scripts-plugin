@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input, Checkbox, Popconfirm } from "antd";
+import { javascript } from "@codemirror/lang-javascript";
+import CodeMirror from "@uiw/react-codemirror";
+import { Button, Checkbox, Form, Input, Modal, Popconfirm, Table } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import { useEffect, useState } from "react";
 import "./App.css";
 
 export interface Script {
@@ -118,7 +118,7 @@ function App() {
         open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
-        width={'70vw'}
+        width={"70vw"}
       >
         <Form form={form} layout="vertical">
           <Form.Item name="name" label="脚本名称" rules={[{ required: true }]}>
@@ -126,7 +126,7 @@ function App() {
           </Form.Item>
           <Form.Item name="code" label="脚本代码" rules={[{ required: true }]}>
             <CodeMirror
-              value={form.getFieldValue('code')}
+              value={form.getFieldValue("code")}
               height="200px"
               extensions={[javascript({ jsx: true })]}
               onChange={(value) => form.setFieldsValue({ code: value })}
@@ -138,14 +138,16 @@ function App() {
           <Form.Item
             name="match"
             label="URL匹配（留空表示所有页面）"
-            dependencies={['autoRun']}
+            dependencies={["autoRun"]}
             rules={[
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!getFieldValue('autoRun') || value) {
+                  if (!getFieldValue("autoRun") || value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('自动执行时必须填写URL匹配规则'));
+                  return Promise.reject(
+                    new Error("自动执行时必须填写URL匹配规则")
+                  );
                 },
               }),
             ]}

@@ -1,13 +1,19 @@
 import { message } from "antd";
+import { Script } from "../options/App";
+import { minimatch } from "minimatch";
+
+// 执行脚本
+function executeScript(code: string) {
+  const script = document.createElement("script");
+  script.textContent = `(function(){${code}})()`;
+  document.body.appendChild(script);
+  document.body.removeChild(script);
+}
 
 chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   if (request.action === "executeScript") {
     try {
-      // 使用 Function 构造器创建一个新的函数并立即执行
-      const script = document.createElement("script");
-      script.textContent = `(function(){${request.code}})()`;
-      document.body.appendChild(script);
-      document.body.removeChild(script);
+      executeScript(request.code);
       sendResponse({ success: true });
     } catch (error: any) {
       console.error("执行脚本时出错:", error);
@@ -15,7 +21,6 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
     }
   }
   if (request.action === "alertMessage") {
-    console.log(request)
     if (request.type in message) {
       (message as any)[request.type](request.content);
     } else {
@@ -25,4 +30,43 @@ chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   return true; // 保持消息通道开放
 });
 
-console.log("dynamic script plugin loaded 1");
+function waitBody(callback: () => void) {
+  if (document.body) {
+    callback();
+    return;
+  }
+  const listen = () => {
+    document.removeEventListener("load", listen, false);
+    document.removeEventListener("DOMContentLoaded", listen, false);
+    waitBody(callback);
+  };
+  document.addEventListener("load", listen, false);
+  document.addEventListener("DOMContentLoaded", listen, false);
+}
+
+// 添加新的消息监听器来请求脚本数据
+chrome.runtime.sendMessage({ action: "getScriptData" }, (response) => {
+  if (response) {
+    // 在这里处理接收到的脚本数据
+    const scriptData: Script[] = response.scriptData;
+    const autoScripts = scriptData.filter(
+      (item) =>
+        item.autoRun &&
+        (item.match ? minimatch(window.location.href, item.match) : true)
+    );
+    waitBody(() => {
+      autoScripts?.forEach((item) => {
+        try {
+          executeScript(item.code);
+        } catch (error) {
+          console.error(error);
+          message.error(`脚本 ${item.name} 执行失败`);
+        }
+      });
+    });
+  } else {
+    console.error("获取脚本数据失败");
+  }
+});
+
+console.log("脚本狗子插件已加载完成。");

@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import commonjs from "@rollup/plugin-commonjs";
 import esbuild from "esbuild";
+import ChromeExtension from "crx";
+import * as fs from "fs";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -21,7 +23,28 @@ export default defineConfig({
           outdir: resolve(__dirname, "dist"),
           allowOverwrite: true,
           entryNames: "[name].iife",
-          bundle: true
+          bundle: true,
+        });
+        const crx = new ChromeExtension({
+          privateKey: fs.readFileSync(
+            resolve(__dirname, "crx/dynamic-scripts.pem"),
+            "utf-8"
+          ),
+        });
+        crx.load(resolve(__dirname, "dist")).then(() => {
+          console.log("Packaging extension...");
+          crx
+            .pack()
+            .then((crxBuffer: Buffer) => {
+              fs.writeFileSync(
+                resolve(__dirname, "crx/dynamic-scripts.crx"),
+                crxBuffer,
+                {
+                  flag: "w",
+                }
+              );
+            })
+            .catch(console.error);
         });
       },
     },

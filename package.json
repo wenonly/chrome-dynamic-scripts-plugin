@@ -1,20 +1,19 @@
 {
-  "name": "chrome-scripts-plugin",
+  "name": "chrome-dynamic-scripts-plugin",
+  "description": "chrome浏览器插件，用于存储自定义脚本，可配置自动手动运行js脚本",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:chrome": "tsc -b && vite build && node scripts/build-chrome.js",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@ant-design/icons": "^5.5.1",
     "@codemirror/lang-javascript": "^6.2.2",
     "@uiw/react-codemirror": "^4.23.2",
     "antd": "^5.20.6",
+    "minimatch": "^10.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -29,6 +28,7 @@
     "@vitejs/plugin-react": "^4.3.1",
     "archiver": "^7.0.1",
     "autoprefixer": "^10.4.20",
+    "crx": "^5.0.1",
     "esbuild": "^0.24.0",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",

@@ -1,15 +1,27 @@
 {
   "manifest_version": 2,
-  "name": "dynamic-script",
-  "version": "0.16.5",
+  "name": "脚本狗子",
+  "version": "1.0.0",
   "author": "wenonly",
-  "description": "run custom javascript in browser",
+  "description": "一个javascript脚本管理器，用于存储自定义脚本，可配置自动或手动执行js脚本。",
+
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
   "options_ui": {
     "page": "src/options/index.html",
     "open_in_tab": true
   },
   "browser_action": {
-    "default_popup": "src/popup/index.html"
+    "default_popup": "src/popup/index.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "content_scripts": [
     {
@@ -35,5 +47,11 @@
     "notifications",
     "clipboardWrite",
     "webRequestBlocking"
-  ]
+  ],
+  "background": {
+    "scripts": [
+      "background.iife.js"
+    ],
+    "persistent": true
+  }
 }

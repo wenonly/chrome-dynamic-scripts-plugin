@@ -4,7 +4,7 @@ import {
   RocketOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Button, Divider, Empty, List, Switch, Tooltip } from "antd";
+import { Button, Empty, List, Space, Tooltip } from "antd";
 import { useEffect, useState } from "react";
 import { Script } from "../options/App";
 import "./App.css";
@@ -13,14 +13,14 @@ function App() {
   const [scripts, setScripts] = useState<Script[]>([]);
 
   // 添加 toggleScript 函数
-  const toggleScript = (id: number) => {
-    const updatedScripts = scripts.map((script) =>
-      script.id === id ? { ...script, autoRun: !script.autoRun } : script
-    );
-    setScripts(updatedScripts);
-    // 可能需要更新 Chrome 存储
-    chrome.storage.sync.set({ scripts: updatedScripts });
-  };
+  // const toggleScript = (id: number) => {
+  //   const updatedScripts = scripts.map((script) =>
+  //     script.id === id ? { ...script, autoRun: !script.autoRun } : script
+  //   );
+  //   setScripts(updatedScripts);
+  //   // 可能需要更新 Chrome 存储
+  //   chrome.storage.sync.set({ scripts: updatedScripts });
+  // };
 
   useEffect(() => {
     chrome.storage.sync.get("scripts", (result) => {
@@ -78,10 +78,10 @@ function App() {
         renderItem={(script) => (
           <List.Item
             actions={[
-              <Switch
-                checked={script.autoRun}
-                onChange={() => toggleScript(script.id)}
-              />,
+              // <Switch
+              //   checked={script.autoRun}
+              //   onChange={() => toggleScript(script.id)}
+              // />,
               <Tooltip title="执行脚本">
                 <Button
                   icon={<PlayCircleOutlined />}
@@ -109,7 +109,7 @@ function App() {
                   <div className="truncate max-w-[150px]">{script.name}</div>
                 </Tooltip>
               }
-              description={script.autoRun ? "自动执行" : "手动执行"}
+              // description={script.autoRun ? "自动执行" : "手动执行"}
             />
           </List.Item>
         )}
@@ -118,26 +118,27 @@ function App() {
 
   return (
     <div className="p-4 bg-white" style={{ width: "360px" }}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-bold text-left">脚本列表</h2>
+      <div className="flex justify-between items-center mb-4 bg-blue-50 p-3 rounded-lg shadow-sm">
+        <h2 className="text-2xl font-extrabold text-blue-700 relative">
+          <span className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text hover:from-purple-500 hover:to-blue-500 transition-all duration-300">脚本狗子</span>
+          <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-blue-500 transform scale-x-0 transition-transform duration-300 origin-left group-hover:scale-x-100"></span>
+        </h2>
         <EditOutlined
-          className="text-lg cursor-pointer"
+          className="text-xl cursor-pointer text-blue-500 hover:text-blue-700 transition-colors duration-300"
           onClick={() => chrome.runtime.openOptionsPage()}
         />
       </div>
-      <Divider />
       {scripts.length > 0 ? (
-        <>
+        <Space direction="vertical" style={{ width: "100%" }}>
           {renderList(
             scripts.filter((item) => item.autoRun),
             "自动执行"
           )}
-          <br />
           {renderList(
             scripts.filter((item) => !item.autoRun),
             "手动执行"
           )}
-        </>
+        </Space>
       ) : (
         <Empty description="暂无脚本" style={{ marginBottom: "30px" }} />
       )}
