@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "脚本狗子",
   "version": "1.0.0",
   "author": "wenonly",
@@ -36,17 +36,9 @@
     }
   ],
   "permissions": [
-    "tabs",
-    "cookies",
     "storage",
-    "downloads",
-    "webRequest",
     "background",
-    "<all_urls>",
-    "contextMenus",
-    "notifications",
-    "clipboardWrite",
-    "webRequestBlocking"
+    "<all_urls>"
   ],
   "background": {
     "scripts": [
