@@ -2,3 +2,4 @@ node_modules
 tsconfig.app.tsbuildinfo
 tsconfig.node.tsbuildinfo
 dist
+crx

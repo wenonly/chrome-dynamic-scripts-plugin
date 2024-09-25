@@ -25,27 +25,26 @@ export default defineConfig({
           entryNames: "[name].iife",
           bundle: true,
         });
-        const crx = new ChromeExtension({
-          privateKey: fs.readFileSync(
-            resolve(__dirname, "crx/dynamic-scripts.pem"),
-            "utf-8"
-          ),
-        });
-        crx.load(resolve(__dirname, "dist")).then(() => {
-          console.log("Packaging extension...");
-          crx
-            .pack()
-            .then((crxBuffer: Buffer) => {
-              fs.writeFileSync(
-                resolve(__dirname, "crx/dynamic-scripts.crx"),
-                crxBuffer,
-                {
-                  flag: "w",
-                }
-              );
-            })
-            .catch(console.error);
-        });
+        if (process.env.CRX_PRIVATE_KEY) {
+          const crx = new ChromeExtension({
+            privateKey: process.env.CRX_PRIVATE_KEY,
+          });
+          crx.load(resolve(__dirname, "dist")).then(() => {
+            console.log("Packaging extension...");
+            crx
+              .pack()
+              .then((crxBuffer: Buffer) => {
+                fs.writeFileSync(
+                  resolve(__dirname, "crx/dynamic-scripts.crx"),
+                  crxBuffer,
+                  {
+                    flag: "w",
+                  }
+                );
+              })
+              .catch(console.error);
+          });
+        }
       },
     },
   ],
