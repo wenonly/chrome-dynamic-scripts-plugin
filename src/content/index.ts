@@ -60,6 +60,7 @@ if (window === window.top) {
         autoScripts?.forEach((item) => {
           try {
             executeScript(item.code);
+            message.success(`脚本 ${item.name} 已执行`);
           } catch (error) {
             console.error(error);
             message.error(`脚本 ${item.name} 执行失败`);
