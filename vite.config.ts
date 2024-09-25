@@ -6,12 +6,16 @@ import esbuild from "esbuild";
 import ChromeExtension from "crx";
 import * as fs from "fs";
 import archiver from "archiver";
+import legacy from "@vitejs/plugin-legacy";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     commonjs(),
+    legacy({
+      targets: ["chrome >= 68"],
+    }),
     {
       name: "esbuild-transform",
       closeBundle() {
@@ -25,6 +29,9 @@ export default defineConfig({
           allowOverwrite: true,
           entryNames: "[name].iife",
           bundle: true,
+          define: {
+            "import.meta": "{}",
+          },
         });
         if (process.env.CRX_PRIVATE_KEY) {
           fs.mkdirSync(resolve(__dirname, "crx"));
