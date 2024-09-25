@@ -34,6 +34,7 @@ export default defineConfig({
             crx
               .pack()
               .then((crxBuffer: Buffer) => {
+                fs.mkdirSync(resolve(__dirname, "crx"));
                 fs.writeFileSync(
                   resolve(__dirname, "crx/dynamic-scripts.crx"),
                   crxBuffer,
