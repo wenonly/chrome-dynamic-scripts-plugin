@@ -119,7 +119,8 @@ function App() {
   return (
     <div className="p-4 bg-white" style={{ width: "360px" }}>
       <div className="flex justify-between items-center mb-4 bg-blue-50 p-3 rounded-lg shadow-sm">
-        <h2 className="text-2xl font-extrabold text-blue-700 relative">
+        <h2 className="text-2xl font-extrabold text-blue-700 relative flex items-center">
+          <img src="/icons/icon128.png" alt="脚本狗子图标" className="w-8 h-8 mr-2" />
           <span className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text hover:from-purple-500 hover:to-blue-500 transition-all duration-300">
             脚本狗子
           </span>

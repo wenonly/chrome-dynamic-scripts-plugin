@@ -9,6 +9,8 @@ import {
   Popconfirm,
   Table,
   message,
+  Layout,
+  Typography,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useEffect, useState } from "react";
@@ -155,29 +157,57 @@ function App() {
   ];
 
   return (
-    <div className="App">
-      <h1>脚本狗子配置</h1>
-      <div style={{ marginBottom: 16 }}>
-        <Button onClick={() => showModal(null)} style={{ marginRight: 8 }}>
-          添加脚本
-        </Button>
-        <Button onClick={exportScripts} style={{ marginRight: 8 }}>
-          导出脚本
-        </Button>
-        <input
-          type="file"
-          accept=".json"
-          onChange={importScripts}
-          style={{ display: "none" }}
-          id="import-scripts"
-        />
-        <Button
-          onClick={() => document.getElementById("import-scripts")?.click()}
-        >
-          导入脚本
-        </Button>
-      </div>
-      <Table columns={columns} dataSource={scripts} rowKey="id" />
+    <Layout className="App" style={{ minHeight: '100vh' }}>
+      <Layout.Header style={{ 
+        background: '#1890ff', 
+        padding: '0 20px', 
+        display: 'flex', 
+        alignItems: 'center',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+      }}>
+        <img src="/icons/icon128.png" alt="Logo" style={{ width: 40, height: 40, marginRight: 16 }} />
+        <Typography.Title level={3} style={{ margin: 0, color: '#fff' }}>脚本狗子配置</Typography.Title>
+      </Layout.Header>
+      <Layout.Content style={{ padding: '24px', backgroundColor: '#f0f2f5' }}>
+        <div style={{ 
+          background: '#fff', 
+          padding: '24px', 
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
+        }}>
+          <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <Button type="primary" onClick={() => showModal(null)} style={{ marginRight: 8 }}>
+                添加脚本
+              </Button>
+              <Button onClick={exportScripts} style={{ marginRight: 8 }}>
+                导出脚本
+              </Button>
+              <input
+                type="file"
+                accept=".json"
+                onChange={importScripts}
+                style={{ display: "none" }}
+                id="import-scripts"
+              />
+              <Button onClick={() => document.getElementById("import-scripts")?.click()}>
+                导入脚本
+              </Button>
+            </div>
+            <Typography.Text type="secondary">
+              共 {scripts.length} 个脚本
+            </Typography.Text>
+          </div>
+          <Table 
+            columns={columns} 
+            dataSource={scripts} 
+            rowKey="id" 
+            pagination={{ pageSize: 10 }}
+            bordered
+            style={{ backgroundColor: '#fff' }}
+          />
+        </div>
+      </Layout.Content>
       <Modal
         title={editingScript ? "编辑脚本" : "添加脚本"}
         open={isModalVisible}
@@ -221,7 +251,7 @@ function App() {
           </Form.Item>
         </Form>
       </Modal>
-    </div>
+    </Layout>
   );
 }
 
