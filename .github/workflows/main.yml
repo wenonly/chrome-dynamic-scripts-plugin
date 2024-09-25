@@ -49,8 +49,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # A property of the create_release step
-          asset_path: ./dist # 替换为你的构建输出目录
-          asset_name: dynamic-scripts-plugin.zip # 上传的文件名
+          asset_path: ./crx # 替换为你的构建输出目录
+          asset_name: chrome-dynamic-scripts-plugin.zip # 上传的文件名
           asset_content_type: application/zip
       
       - name: Upload Release Crx
@@ -60,6 +60,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # A property of the create_release step
-          asset_path: ./crx/dynamic-scripts.crx # 替换为你的构建输出目录
-          asset_name: dynamic-scripts-plugin.crx # 上传的文件名
+          asset_path: ./crx # 替换为你的构建输出目录
+          asset_name: chrome-dynamic-scripts-plugin.crx # 上传的文件名
           asset_content_type: application/x-chrome-extension
