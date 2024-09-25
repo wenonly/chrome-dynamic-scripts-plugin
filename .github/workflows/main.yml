@@ -1,0 +1,62 @@
+name: Build and Release Frontend Project
+
+on:
+  push:
+    branches:
+      - main # 或者你的默认分支名称
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.19.0' # 选择你项目的 Node.js 版本
+
+      - name: corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        env:
+          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        run: pnpm run build # 确保这与你的 package.json 中的构建命令匹配
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Dist
+        id: upload-release-dist 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # A property of the create_release step
+          asset_path: ./dist # 替换为你的构建输出目录
+          asset_name: dynamic-scripts-plugin.zip # 上传的文件名
+          asset_content_type: application/zip
+      
+      - name: Upload Release Crx
+        id: upload-release-crx 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # A property of the create_release step
+          asset_path: ./crx/dynamic-scripts.crx # 替换为你的构建输出目录
+          asset_name: dynamic-scripts-plugin.crx # 上传的文件名
+          asset_content_type: application/x-chrome-extension
