@@ -5,6 +5,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import esbuild from "esbuild";
 import ChromeExtension from "crx";
 import * as fs from "fs";
+import archiver from "archiver";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -26,6 +27,8 @@ export default defineConfig({
           bundle: true,
         });
         if (process.env.CRX_PRIVATE_KEY) {
+          fs.mkdirSync(resolve(__dirname, "crx"));
+          // 打包crx
           const crx = new ChromeExtension({
             privateKey: process.env.CRX_PRIVATE_KEY,
           });
@@ -34,9 +37,8 @@ export default defineConfig({
             crx
               .pack()
               .then((crxBuffer: Buffer) => {
-                fs.mkdirSync(resolve(__dirname, "crx"));
                 fs.writeFileSync(
-                  resolve(__dirname, "crx/dynamic-scripts.crx"),
+                  resolve(__dirname, "crx/chrome-dynamic-scripts-plugin.crx"),
                   crxBuffer,
                   {
                     flag: "w",
@@ -45,6 +47,26 @@ export default defineConfig({
               })
               .catch(console.error);
           });
+          // 压缩dist目录为zip
+          const output = fs.createWriteStream(
+            resolve(__dirname, "crx/chrome-dynamic-scripts-plugin.zip")
+          );
+          const archive = archiver("zip", {
+            zlib: { level: 9 }, // 设置压缩级别
+          });
+
+          output.on("close", function () {
+            console.log(archive.pointer() + " 总字节数");
+            console.log("archiver已完成文件的归档，文件输出流已关闭。");
+          });
+
+          archive.on("error", function (err) {
+            throw err;
+          });
+
+          archive.pipe(output);
+          archive.directory("dist/", false);
+          archive.finalize();
         }
       },
     },
