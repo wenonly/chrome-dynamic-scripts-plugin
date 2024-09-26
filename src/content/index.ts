@@ -1,21 +1,34 @@
 import { message } from "antd";
-import { Script } from "../options/App";
 import { minimatch } from "minimatch";
+import { Script } from "../options/App";
 
 // iframe中不执行
 if (window === window.top) {
   // 执行脚本
   function executeScript(code: string) {
-    const script = document.createElement("script");
-    script.textContent = `(function(){${code}})()`;
-    document.body.appendChild(script);
-    document.body.removeChild(script);
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      const messageName = "error_" + Math.floor(Math.random() * 100000);
+      const handler = (e: Event) => reject((e as CustomEvent).detail);
+      window.addEventListener(messageName, handler);
+      script.textContent = `(function(){
+          try {
+            ${code}
+          } catch(e) {
+            window.dispatchEvent(new CustomEvent('${messageName}', { detail: e }));
+          }
+      })()`;
+      document.body.appendChild(script);
+      document.body.removeChild(script);
+      window.removeEventListener(messageName, handler);
+      resolve(true);
+    });
   }
 
-  chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
+  chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
     if (request.action === "executeScript") {
       try {
-        executeScript(request.code);
+        await executeScript(request.code);
         sendResponse({ success: true });
       } catch (error: any) {
         console.error("执行脚本时出错:", error);
@@ -56,21 +69,19 @@ if (window === window.top) {
           item.autoRun &&
           (item.match ? minimatch(window.location.href, item.match) : true)
       );
-      waitBody(() => {
-        autoScripts?.forEach((item) => {
+      waitBody(async () => {
+        for (const item of autoScripts) {
           try {
-            executeScript(item.code);
+            await executeScript(item.code);
             message.success(`脚本 ${item.name} 已执行`);
           } catch (error) {
             console.error(error);
             message.error(`脚本 ${item.name} 执行失败`);
           }
-        });
+        }
       });
     } else {
       console.error("获取脚本数据失败");
     }
   });
-
-  console.log("脚本狗子插件已加载完成。");
 }
