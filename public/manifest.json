@@ -4,18 +4,27 @@
   "version": "1.0.0",
   "author": "wenonly",
   "description": "一个javascript脚本管理器，用于存储自定义脚本，可配置自动或手动执行js脚本。",
-
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  
   "options_ui": {
     "page": "src/options/index.html",
     "open_in_tab": true
   },
-  "browser_action": {
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.iife.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "background": {
+    "service_worker": "background.iife.js"
+  },
+  "action": {
     "default_popup": "src/popup/index.html",
     "default_icon": {
       "16": "icons/icon16.png",
@@ -23,27 +32,6 @@
       "128": "icons/icon128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "content.iife.js"
-      ],
-      "run_at": "document_start",
-      "all_frames": true
-    }
-  ],
-  "permissions": [
-    "storage",
-    "background",
-    "<all_urls>"
-  ],
-  "background": {
-    "scripts": [
-      "background.iife.js"
-    ],
-    "persistent": true
-  }
+  "permissions": ["storage", "scripting", "tabs", "activeTab", "background"],
+  "host_permissions": ["<all_urls>"]
 }
