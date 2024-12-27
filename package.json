@@ -9,6 +9,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@ant-design/cssinjs": "^1.22.1",
     "@ant-design/icons": "^5.5.1",
     "@codemirror/lang-javascript": "^6.2.2",
     "@uiw/react-codemirror": "^4.23.2",
