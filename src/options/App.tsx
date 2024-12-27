@@ -1,19 +1,24 @@
 import { javascript } from "@codemirror/lang-javascript";
 import CodeMirror from "@uiw/react-codemirror";
+import { useRequest } from "ahooks";
 import {
   Button,
   Checkbox,
   Form,
   Input,
+  Layout,
   Modal,
   Popconfirm,
   Table,
-  message,
-  Layout,
   Typography,
+  message,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import {
+  getScriptsFromStorage,
+  setScriptsToStorage,
+} from "../utils/storageHelper";
 import "./App.css";
 
 export interface Script {
@@ -28,25 +33,16 @@ function App() {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingScript, setEditingScript] = useState<Script | null>(null);
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<Script>();
 
-  useEffect(() => {
-    if (chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.get("scripts", (result) => {
-        if (result.scripts) {
-          setScripts(result.scripts);
-        }
-      });
-    } else {
-      console.warn("chrome.storage.sync 不可用");
-    }
-  }, []);
+  useRequest(() =>
+    getScriptsFromStorage().then((storageScripts) => setScripts(storageScripts))
+  );
 
   const saveScripts = (updatedScripts: Script[]) => {
-    setScripts(updatedScripts);
-    if (chrome.storage && chrome.storage.sync) {
-      chrome.storage.sync.set({ scripts: updatedScripts });
-    }
+    setScriptsToStorage(updatedScripts).then(() => {
+      setScripts(updatedScripts);
+    });
   };
 
   const showModal = (script: Script | null) => {
@@ -80,12 +76,8 @@ function App() {
     saveScripts(updatedScripts);
   };
 
-  const exportScripts = () => {
-    const scriptsWithEncodedCode = scripts.map((script) => ({
-      ...script,
-      code: btoa(script.code),
-    }));
-    const dataStr = JSON.stringify(scriptsWithEncodedCode);
+  const exportScripts = async () => {
+    const dataStr = JSON.stringify(await getScriptsFromStorage());
     const dataUri =
       "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
     const exportFileDefaultName = "scripts_export.json";
@@ -105,14 +97,11 @@ function App() {
           const importedScripts: Script[] = JSON.parse(
             e.target?.result as string
           );
-          const scriptsWithDecodedCode = importedScripts.map((script) => ({
-            ...script,
-            code: atob(script.code),
-          }));
-          saveScripts(scriptsWithDecodedCode);
+          saveScripts(importedScripts);
           message.success("脚本导入成功");
         } catch (error) {
           message.error("导入失败，请检查文件格式");
+          console.error(error);
         }
       };
       reader.readAsText(file);
@@ -157,27 +146,47 @@ function App() {
   ];
 
   return (
-    <Layout className="App" style={{ minHeight: '100vh' }}>
-      <Layout.Header style={{ 
-        background: '#1890ff', 
-        padding: '0 20px', 
-        display: 'flex', 
-        alignItems: 'center',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-      }}>
-        <img src="/icons/icon128.png" alt="Logo" style={{ width: 40, height: 40, marginRight: 16 }} />
-        <Typography.Title level={3} style={{ margin: 0, color: '#fff' }}>脚本狗子配置</Typography.Title>
+    <Layout className="App" style={{ minHeight: "100vh" }}>
+      <Layout.Header
+        style={{
+          background: "#1890ff",
+          padding: "0 20px",
+          display: "flex",
+          alignItems: "center",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        }}
+      >
+        <img
+          src="/icons/icon128.png"
+          alt="Logo"
+          style={{ width: 40, height: 40, marginRight: 16 }}
+        />
+        <Typography.Title level={3} style={{ margin: 0, color: "#fff" }}>
+          脚本狗子配置
+        </Typography.Title>
       </Layout.Header>
-      <Layout.Content style={{ padding: '24px', backgroundColor: '#f0f2f5' }}>
-        <div style={{ 
-          background: '#fff', 
-          padding: '24px', 
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)'
-        }}>
-          <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between' }}>
+      <Layout.Content style={{ padding: "24px", backgroundColor: "#f0f2f5" }}>
+        <div
+          style={{
+            background: "#fff",
+            padding: "24px",
+            borderRadius: "8px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+          }}
+        >
+          <div
+            style={{
+              marginBottom: 24,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
             <div>
-              <Button type="primary" onClick={() => showModal(null)} style={{ marginRight: 8 }}>
+              <Button
+                type="primary"
+                onClick={() => showModal(null)}
+                style={{ marginRight: 8 }}
+              >
                 添加脚本
               </Button>
               <Button onClick={exportScripts} style={{ marginRight: 8 }}>
@@ -190,7 +199,11 @@ function App() {
                 style={{ display: "none" }}
                 id="import-scripts"
               />
-              <Button onClick={() => document.getElementById("import-scripts")?.click()}>
+              <Button
+                onClick={() =>
+                  document.getElementById("import-scripts")?.click()
+                }
+              >
                 导入脚本
               </Button>
             </div>
@@ -198,13 +211,13 @@ function App() {
               共 {scripts.length} 个脚本
             </Typography.Text>
           </div>
-          <Table 
-            columns={columns} 
-            dataSource={scripts} 
-            rowKey="id" 
+          <Table
+            columns={columns}
+            dataSource={scripts}
+            rowKey="id"
             pagination={{ pageSize: 10 }}
             bordered
-            style={{ backgroundColor: '#fff' }}
+            style={{ backgroundColor: "#fff" }}
           />
         </div>
       </Layout.Content>

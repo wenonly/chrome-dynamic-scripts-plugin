@@ -12,6 +12,7 @@
     "@ant-design/icons": "^5.5.1",
     "@codemirror/lang-javascript": "^6.2.2",
     "@uiw/react-codemirror": "^4.23.2",
+    "ahooks": "^3.8.4",
     "antd": "^5.20.6",
     "minimatch": "^10.0.1",
     "react": "^18.3.1",

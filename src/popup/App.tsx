@@ -4,31 +4,18 @@ import {
   RocketOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
+import { useRequest } from "ahooks";
 import { Button, Empty, List, Space, Tooltip } from "antd";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Script } from "../options/App";
+import { getScriptsFromStorage } from "../utils/storageHelper";
 import "./App.css";
 
 function App() {
   const [scripts, setScripts] = useState<Script[]>([]);
-
-  // 添加 toggleScript 函数
-  // const toggleScript = (id: number) => {
-  //   const updatedScripts = scripts.map((script) =>
-  //     script.id === id ? { ...script, autoRun: !script.autoRun } : script
-  //   );
-  //   setScripts(updatedScripts);
-  //   // 可能需要更新 Chrome 存储
-  //   chrome.storage.sync.set({ scripts: updatedScripts });
-  // };
-
-  useEffect(() => {
-    chrome.storage.sync.get("scripts", (result) => {
-      if (result.scripts) {
-        setScripts(result.scripts);
-      }
-    });
-  }, []);
+  useRequest(() =>
+    getScriptsFromStorage().then((storageScripts) => setScripts(storageScripts))
+  );
 
   const alertMessage = (
     type: "success" | "error" | "info" | "warning",
@@ -120,7 +107,11 @@ function App() {
     <div className="p-4 bg-white" style={{ width: "360px" }}>
       <div className="flex justify-between items-center mb-4 bg-blue-50 p-3 rounded-lg shadow-sm">
         <h2 className="text-2xl font-extrabold text-blue-700 relative flex items-center">
-          <img src="/icons/icon128.png" alt="脚本狗子图标" className="w-8 h-8 mr-2" />
+          <img
+            src="/icons/icon128.png"
+            alt="脚本狗子图标"
+            className="w-8 h-8 mr-2"
+          />
           <span className="inline-block bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text hover:from-purple-500 hover:to-blue-500 transition-all duration-300">
             脚本狗子
           </span>
