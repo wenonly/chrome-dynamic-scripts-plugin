@@ -15,6 +15,7 @@ export default defineConfig({
     commonjs(),
     legacy({
       targets: ["chrome >= 68"],
+      additionalLegacyPolyfills: ["core-js/stable", "regenerator-runtime/runtime"]
     }),
     {
       name: "esbuild-transform",
