@@ -1,6 +1,4 @@
 import { message } from "antd";
-import { minimatch } from "minimatch";
-import { Script } from "../options/App";
 
 // iframe中不执行
 if (window === window.top) {
@@ -43,45 +41,5 @@ if (window === window.top) {
       }
     }
     return true; // 保持消息通道开放
-  });
-
-  function waitBody(callback: () => void) {
-    if (document.body) {
-      callback();
-      return;
-    }
-    const listen = () => {
-      document.removeEventListener("load", listen, false);
-      document.removeEventListener("DOMContentLoaded", listen, false);
-      waitBody(callback);
-    };
-    document.addEventListener("load", listen, false);
-    document.addEventListener("DOMContentLoaded", listen, false);
-  }
-
-  // 添加新的消息监听器来请求脚本数据
-  chrome.runtime.sendMessage({ action: "getScriptData" }, (response) => {
-    if (response) {
-      // 在这里处理接收到的脚本数据
-      const scriptData: Script[] = response.scriptData;
-      const autoScripts = scriptData.filter(
-        (item) =>
-          item.autoRun &&
-          (item.match ? minimatch(window.location.href, item.match) : true)
-      );
-      waitBody(async () => {
-        for (const item of autoScripts) {
-          try {
-            await executeScript(item.code);
-            message.success(`脚本 ${item.name} 已执行`);
-          } catch (error) {
-            console.error(error);
-            message.error(`脚本 ${item.name} 执行失败`);
-          }
-        }
-      });
-    } else {
-      console.error("获取脚本数据失败");
-    }
   });
 }

@@ -3,7 +3,6 @@ import CodeMirror from "@uiw/react-codemirror";
 import { useRequest } from "ahooks";
 import {
   Button,
-  Checkbox,
   Form,
   Input,
   Layout,
@@ -115,20 +114,9 @@ function App() {
       key: "name",
     },
     {
-      title: "自动执行",
-      dataIndex: "autoRun",
-      key: "autoRun",
-      render: (autoRun: boolean) => (autoRun ? "是" : "否"),
-    },
-    {
-      title: "URL匹配",
-      dataIndex: "match",
-      key: "match",
-      render: (match: string) => match || "未配置",
-    },
-    {
       title: "操作",
       key: "action",
+      width: 200,
       render: (_, record) => (
         <span>
           <Button onClick={() => showModal(record)}>编辑</Button>
@@ -235,32 +223,10 @@ function App() {
           <Form.Item name="code" label="脚本代码" rules={[{ required: true }]}>
             <CodeMirror
               value={form.getFieldValue("code")}
-              height="200px"
+              height="400px"
               extensions={[javascript({ jsx: true })]}
               onChange={(value) => form.setFieldsValue({ code: value })}
             />
-          </Form.Item>
-          <Form.Item name="autoRun" valuePropName="checked">
-            <Checkbox>自动执行</Checkbox>
-          </Form.Item>
-          <Form.Item
-            name="match"
-            label="URL匹配（留空表示所有页面，用于自动执行时匹配网页）"
-            dependencies={["autoRun"]}
-            rules={[
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!getFieldValue("autoRun") || value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("自动执行时必须填写URL匹配规则")
-                  );
-                },
-              }),
-            ]}
-          >
-            <Input placeholder="例如: https://*.example.com/*" />
           </Form.Item>
         </Form>
       </Modal>
